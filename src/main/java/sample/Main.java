@@ -13,10 +13,9 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/sample.fxml"));
         Parent root = loader.load();
         Controller controller = loader.getController();
-        controller.getBase64();
-
-        primaryStage.setTitle("Generator sprawozdania finansoweg");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        controller.setComboBox();
+        primaryStage.setTitle("Generator sprawozdania finansowego");
+        primaryStage.setScene(new Scene(root, 800, 400));
         primaryStage.show();
     }
 
