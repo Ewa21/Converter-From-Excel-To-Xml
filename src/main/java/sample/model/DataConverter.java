@@ -30,7 +30,7 @@ public class DataConverter {
         return instance;
     }
 
-    public Boolean convert(String path, Integer amount, List<File> list,TextArea textArea) throws IOException, InvalidFormatException {
+    public Boolean convert(String path, List<FilePDF> list,StringBuilder text, String schemePath) throws IOException, InvalidFormatException {
 
         System.out.println("conver start");
         File excelFile=new File(path);
@@ -64,17 +64,15 @@ public class DataConverter {
                 }
                 else if(output.equals(Tag.FILE_NAME)){
                     FilePDF filePDF;
-                    for(File f : list){
-                        filePDF=new FilePDF(f);
-                        out.write(filePDF.getTags());
+                    for(FilePDF f : list){
+                        out.write(f.getTags());
                     }
 
                 }
                 else {
                     out.write(output);
-                    textArea.appendText(output);
+                    text.append(output);
                     System.out.print(output);
-                   // textUser.appendText(output);
                 }
             }
             else{
@@ -82,15 +80,15 @@ public class DataConverter {
                 skipNext=false;
             }
         }
-        checkValidation(xmlName);
+       // checkValidation(xmlName, text, schemePath);
         out.close();
         workbook.close();
         return true;
     }
 
-    private void checkValidation(String file){
+    private void checkValidation(String file, StringBuilder textArea, String schemePath){
 
-        File schemaFile = new File("C:\\Users\\PC\\Desktop\\IT_development\\Java_all\\Java-Job\\generatorSF\\src\\main\\java\\sample\\model\\scheme.xsd"); // etc.
+        File schemaFile = new File(schemePath);
         Source xmlFile = new StreamSource(new File(file));
         SchemaFactory schemaFactory = SchemaFactory
                 .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -99,9 +97,15 @@ public class DataConverter {
             Validator validator = schema.newValidator();
             validator.validate(xmlFile);
             System.out.println(xmlFile.getSystemId() + " is valid");
+            textArea.append(xmlFile.getSystemId() + " jest zgodny.");
+
         } catch (SAXException e) {
             System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
-        } catch (IOException e) {}
+            textArea.append(xmlFile.getSystemId() + " NIE jest zgodny z powodu:\n" + e);
+        } catch (IOException e) {
+            System.out.println("Opening the scheme file failed." + e.getMessage());
+            textArea.append("Błąd podczas wczytywania pkiku scheme.");
+        }
 
     }
 }

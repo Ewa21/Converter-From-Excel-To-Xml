@@ -12,12 +12,14 @@ public class FilePDF {
     private File file;
     private String path;
     private String name;
+    private String header;
 
-    public FilePDF(File file) {
+    public FilePDF(File file, String header) {
 
         this.file=file;
         this.path = file.getAbsolutePath();
         this.name= file.getName();
+        this.header=header;
     }
 
 
@@ -40,7 +42,7 @@ public class FilePDF {
     public String getTags(){
             String string = "<tns:DodatkoweInformacjeIObjasnienia>\n";
             string+="<dtsf:Opis>";
-            string+="Noty";
+            string+=header;
             string+="</dtsf:Opis>\n";
             string+="<dtsf:Plik>\n";
             string+="<dtsf:Nazwa>";

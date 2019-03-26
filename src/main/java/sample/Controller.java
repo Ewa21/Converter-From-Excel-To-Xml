@@ -1,159 +1,120 @@
 package sample;
 
-
-import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import sample.model.DataConverter;
-
-
+import sample.model.FilePDF;
 import java.io.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Controller {
 
     private String excelPath="";
-    private  Integer pdfAmount=0;
-    private  List<File> pdfFiles= new ArrayList<>();
+    private String schemePath="";
+    private List<FilePDF> pdfs= new ArrayList<>();
     @FXML
     private ProgressBar progressBar;
     @FXML
-    private Button confirmButton;
-    @FXML
     private Button generateButton;
     @FXML
-    private Button getPDFButton;
+    private Label excelLabel;
     @FXML
-    private Label browserExcel;
+    private Label pdf1Label;
     @FXML
-    private Label browserPDF;
+    private Label pdf2Label;
     @FXML
-    private Label pdfAmountLabel;
+    private Label pdf3Label;
     @FXML
-    private Label notification;
-    private final ObservableList<String> options =
-            FXCollections.observableArrayList(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5"
-            );
+    private Label pdf4Label;
     @FXML
-    private ComboBox<String> comboBox=new ComboBox(options);
+    private Label pdf5Label;
+    @FXML
+    private TextField pdf1Text;
+    @FXML
+    private TextField pdf2Text;
+    @FXML
+    private TextField pdf3Text;
+    @FXML
+    private TextField pdf4Text;
+    @FXML
+    private TextField pdf5Text;
+    @FXML
+    private TextArea textArea;
 
-
-
-    public void setComboBox(){
-
-             comboBox.setItems(options);
-             comboBox.getSelectionModel().selectedItemProperty()
-                .addListener(new ChangeListener<String>() {
-                    public void changed(ObservableValue<? extends String> observable,
-                                        String oldValue, String newValue) {
-                        System.out.println("Value is: "+newValue);
-                        pdfAmount=Integer.parseInt(newValue);
-                        confirmButton.setDisable(false);
-
-                    }
-                });
-    }
 
     @FXML
-    public void test( ActionEvent event ) {
+    public void getPdfFiles(ActionEvent event) {
 
-        String output = comboBox.getSelectionModel().getSelectedItem().toString();
-        System.out.println(output);
-
-
-    }
-    @FXML
-    public void confirmNumberOfPDFs() {
-
-
-        if (!pdfAmount.equals(0)) {
-
-            pdfAmountLabel.setText("Proszę załadować " + pdfAmount + " pliki pdf.");
-            getPDFButton.setDisable(false);
-
-        } else {
-            notification.setText("Wybierz liczbę plików pdf.");
-        }
-    }
-
-    @FXML
-    public void getPdfFiles() {
-
-        List<File> selectedFiles;
-        String text="";
+        File selectedFile;
+        FilePDF filePDF;
+        String header;
+        String buttonId;
+        String path;
+        Label label;
+        TextField textField;
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select PDF files");
+        fileChooser.setTitle("Select PDF file");
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-                selectedFiles = fileChooser.showOpenMultipleDialog(null);
-
-
-                if(selectedFiles.size()>(pdfAmount-pdfFiles.size())){
-                    text+="Załadowano za dużo plików.\n";
-                    text+="Oczekiwana liczba plików: "+pdfAmount+"\n";
-                    generateButton.setDisable(true);
-                }
-                else if (selectedFiles.size()<(pdfAmount-pdfFiles.size())){
-                    text+="Załadowano za mało plików.\n";
-                    text+="Oczekiwana liczba plików: "+pdfAmount+"\n";
-                    text+="Załądowano liczba plików: "+(pdfFiles.size()+selectedFiles.size())+"\n";
-                }
-                else{
-                    generateButton.setDisable(false);
-                }
-            Integer  amountToDisplay=((pdfFiles.size()+selectedFiles.size())-pdfAmount)>=0 ? pdfAmount:selectedFiles.size()+pdfFiles.size();
-
-        if (selectedFiles != null) {
-            text+= "Załadowano " + amountToDisplay + " plików PDF \n";
-
-            for(File f : pdfFiles){
-                text+=f.getName() + "\n";
+                selectedFile = fileChooser.showOpenDialog(null);
+        buttonId=((Button)event.getSource()).getId();
+        System.out.println(buttonId);
+        label= getLabel(buttonId);
+        if (selectedFile != null) {
+            header= getTextField(buttonId).getText();
+            filePDF = new FilePDF(selectedFile,header);
+            pdfs.add(filePDF);
+            label.setText("Wybrano plik: " + selectedFile.getName());
+            if(buttonId.equals("pdf1Button")) {
+                generateButton.setDisable(false);
             }
-
-            for(File f : selectedFiles){
-                if(pdfFiles.size()<pdfAmount) {
-                    text += f.getName() + "\n";
-                    pdfFiles.add(f);
-                }
-            }
-            browserPDF.setText(text);
-
-
-        }
-        else {
-            browserPDF.setText("PDF file selection cancelled.");
+        } else {
+            label.setText("Bląd podczas wybierania pliku.");
         }
 
-        if(pdfFiles.size()==pdfAmount){
-            generateButton.setDisable(false);
-        }
 
+    }
+    private TextField getTextField(String buttonName){
+
+        switch (buttonName){
+            case "pdf1Button":
+                return pdf1Text;
+            case "pdf2Button":
+                return pdf2Text;
+            case "pdf3Button":
+                return pdf3Text;
+            case "pdf4Button":
+                return pdf4Text;
+            case "pdf5Button":
+                return pdf5Text;
+        }
+        return null;
+    }
+
+    private Label getLabel(String buttonName){
+
+        switch (buttonName){
+            case "pdf1Button":
+                return pdf1Label;
+            case "pdf2Button":
+                return pdf2Label;
+            case "pdf3Button":
+                return pdf3Label;
+            case "pdf4Button":
+                return pdf4Label;
+            case "pdf5Button":
+                return pdf5Label;
+        }
+        return null;
     }
 
     @FXML
@@ -165,30 +126,23 @@ public class Controller {
         File selectedFile = fileChooser.showOpenDialog(null);
 
         if (selectedFile != null) {
-           excelPath=selectedFile.getAbsolutePath();
-            browserExcel.setText("Wybrano plik: " + selectedFile.getName());
+            excelPath=selectedFile.getAbsolutePath();
+            excelLabel.setText("Wybrano plik: " + selectedFile.getName());
 
         } else {
-            browserExcel.setText("Bląd podczas wybierania pliku.");
+            excelLabel.setText("Bląd podczas wybierania pliku.");
         }
     }
     @FXML
     public void convert() {
 
-        Stage stage = new Stage();
-        VBox box = new VBox();
-        TextArea textArea = new TextArea();
-        textArea.setMinSize(600,400);
-        box.getChildren().add(textArea);
-        Scene scene = new Scene(box, 600, 400);
-        stage.setScene(scene);
 
-
+         StringBuilder text=new StringBuilder();
         Task<Boolean> task = new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
                 try {
-                    return DataConverter.getInstance().convert(excelPath, pdfAmount,pdfFiles,textArea);
+                    return DataConverter.getInstance().convert(excelPath,pdfs,text, schemePath);
 
                 }
                 catch(InvalidFormatException e){
@@ -200,9 +154,9 @@ public class Controller {
 
         progressBar.progressProperty().bind(task.progressProperty());
         progressBar.setVisible(true);
-        task.setOnSucceeded(e -> {progressBar.setVisible(false);stage.show();});
+        task.setOnSucceeded(e -> {progressBar.setVisible(false); textArea.setText(text.toString());});
 
-        task.setOnFailed(e -> progressBar.setVisible(false));
+        task.setOnFailed(e -> {progressBar.setVisible(false); textArea.setText(text.toString());});
 
 
         new Thread(task).start();
